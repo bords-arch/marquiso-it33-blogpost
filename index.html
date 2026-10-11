@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Seeing Our Risk Assessment Through an Auditor's Eyes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    --bg: #eef2f0;
+    --surface: #f9fbfa;
+    --ink: #14232b;
+    --muted: #4d5f66;
+    --line: #c6d0cc;
+    --accent: #2447c9;
+    --accent-ink: #ffffff;
+    --mark: #f3d34a;
+    --ok: #1f7a4d;
+    --head: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+    --body: "Source Serif 4", Georgia, "Times New Roman", serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1a1f;
+      --surface: #16252c;
+      --ink: #e6eeeb;
+      --muted: #9db0b2;
+      --line: #2c4048;
+      --accent: #8aa4ff;
+      --accent-ink: #0f1a1f;
+      --mark: #d9b92f;
+      --ok: #5fd196;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1a1f;
+    --surface: #16252c;
+    --ink: #e6eeeb;
+    --muted: #9db0b2;
+    --line: #2c4048;
+    --accent: #8aa4ff;
+    --accent-ink: #0f1a1f;
+    --mark: #d9b92f;
+    --ok: #5fd196;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); scroll-behavior: smooth; }
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 1.125rem;
+    line-height: 1.7;
+  }
+  a { color: var(--accent); text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+  }
+  .wrap { width: 100%; max-width: 68rem; margin: 0 auto; padding: 0 1.25rem; }
+
+  /* top bar */
+  .bar { border-bottom: 1px solid var(--line); }
+  .bar .wrap { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding-top: .9rem; padding-bottom: .9rem; }
+  .brand { font-family: var(--head); font-weight: 700; font-size: 1.05rem; letter-spacing: -.01em; }
+  .bar nav { display: flex; gap: 1.25rem; font-family: var(--head); font-size: .95rem; }
+  .bar nav a { color: var(--ink); text-decoration: none; }
+  .bar nav a:hover { text-decoration: underline; }
+
+  .bar .wrap { flex-wrap: wrap; }
+  .account { position: relative; }
+  .acct-btn {
+    display: flex; align-items: center; gap: .6rem;
+    font: inherit; color: var(--ink);
+    background: transparent; border: 0; padding: .2rem .4rem .2rem .2rem;
+    border-radius: 999px; cursor: pointer;
+  }
+  .acct-btn:hover { background: var(--surface); }
+  .avatar-sm {
+    width: 2.1rem; height: 2.1rem; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--accent); color: var(--accent-ink);
+    font-family: var(--head); font-weight: 700; font-size: .85rem;
+  }
+  .chev { transition: transform .15s; }
+  .acct-btn[aria-expanded="true"] .chev { transform: rotate(180deg); }
+  .acct-menu {
+    position: absolute; left: 0; top: calc(100% + .5rem); z-index: 20;
+    width: min(22rem, calc(100vw - 2.5rem));
+    background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+    padding: 1rem 1.1rem; box-shadow: 0 8px 24px rgba(0,0,0,.18);
+    font-family: var(--head);
+  }
+  .acct-menu[hidden] { display: none; }
+  .acct-title { margin: 0 0 .75rem; font-weight: 700; font-size: 1rem; }
+  .acct-menu dl { margin: 0; display: grid; gap: .65rem; }
+  .acct-menu dt { font-size: .85rem; color: var(--muted); }
+  .acct-menu dd { margin: 0; font-size: 1rem; font-weight: 500; overflow-wrap: anywhere; }
+  .acct-menu { max-height: calc(100vh - 6rem); overflow-y: auto; }
+  .mail-form { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--line); display: grid; gap: .6rem; }
+  .mail-form .mf-title { margin: 0; font-weight: 700; font-size: 1rem; }
+  .mail-form label { display: grid; gap: .2rem; font-size: .85rem; color: var(--muted); }
+  .mail-form input, .mail-form textarea {
+    font: inherit; font-size: 1rem; color: var(--ink);
+    background: var(--bg); border: 1px solid var(--line); border-radius: 6px;
+    padding: .5rem .6rem; width: 100%;
+  }
+  .mail-form textarea { resize: vertical; min-height: 6rem; }
+  .mail-form input:focus-visible, .mail-form textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .mf-actions { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+  .send-btn {
+    display: inline-block; background: var(--accent); color: var(--accent-ink);
+    padding: .55rem 1rem; border-radius: 6px; text-decoration: none; font-weight: 500;
+  }
+  .send-btn:hover { filter: brightness(1.08); }
+  .copy-btn {
+    font: inherit; font-size: .92rem; color: var(--ink); background: transparent;
+    border: 1px solid var(--line); border-radius: 6px; padding: .5rem .8rem; cursor: pointer;
+  }
+  .copy-btn:hover { background: var(--bg); }
+  .mf-note { margin: 0; font-size: .85rem; color: var(--muted); }
+
+  /* hero */
+  .hero { padding: 3.5rem 0 3rem; }
+  .hero .grid { display: grid; grid-template-columns: 1fr; gap: 2.5rem; align-items: start; }
+  h1 {
+    font-family: var(--head);
+    font-weight: 700;
+    font-size: clamp(2.1rem, 5.2vw, 3.6rem);
+    line-height: 1.04;
+    letter-spacing: -.025em;
+    margin: 0 0 1.25rem;
+    text-wrap: balance;
+  }
+  .lede { font-size: 1.2rem; color: var(--muted); max-width: 32rem; margin: 0 0 1.5rem; }
+  .byline { font-family: var(--head); font-size: .95rem; color: var(--muted); margin: 0 0 1.75rem; }
+  .btn {
+    display: inline-block;
+    font-family: var(--head);
+    font-weight: 500;
+    background: var(--accent);
+    color: var(--accent-ink);
+    padding: .7rem 1.2rem;
+    border-radius: 6px;
+    text-decoration: none;
+  }
+  .btn:hover { filter: brightness(1.08); }
+
+  /* ledger */
+  .ledger { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .ledger-head { padding: 1rem 1.15rem .85rem; border-bottom: 1px solid var(--line); font-family: var(--head); }
+  .ledger-head strong { display: block; font-size: 1.05rem; }
+  .ledger-head span { font-size: .9rem; color: var(--muted); }
+  .scroll-x { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-family: var(--head); font-size: .92rem; min-width: 30rem; }
+  th { text-align: left; font-weight: 500; color: var(--muted); padding: .6rem 1.15rem; border-bottom: 1px solid var(--line); }
+  td { padding: .75rem 1.15rem; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  tr:last-child td { border-bottom: 0; }
+  .tag { display: inline-block; padding: .05rem .5rem; border: 1px solid var(--line); border-radius: 4px; font-size: .85rem; }
+  .ev {
+    font: inherit;
+    cursor: pointer;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--muted);
+    border-radius: 999px;
+    padding: .25rem .8rem;
+    min-width: 8.5rem;
+    text-align: left;
+  }
+  .ev[aria-pressed="true"] { background: var(--ok); border-color: var(--ok); color: #fff; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ev[aria-pressed="true"] { color: #0f1a1f; } }
+  :root[data-theme="dark"] .ev[aria-pressed="true"] { color: #0f1a1f; }
+  .ledger-foot { padding: .85rem 1.15rem; border-top: 1px solid var(--line); font-family: var(--head); font-size: .92rem; display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .ledger-foot b { background: linear-gradient(transparent 55%, var(--mark) 55%); padding: 0 .15rem; color: var(--ink); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ledger-foot b { background: linear-gradient(transparent 55%, rgba(217,185,47,.45) 55%); } }
+  :root[data-theme="dark"] .ledger-foot b { background: linear-gradient(transparent 55%, rgba(217,185,47,.45) 55%); }
+
+  /* profile */
+  .profile { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--surface); padding: 3rem 0; }
+  .profile .grid { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+  @media (min-width: 52rem) { .profile .grid { grid-template-columns: 14rem 1fr; gap: 3rem; } }
+  h2 { font-family: var(--head); font-weight: 700; font-size: 1.6rem; letter-spacing: -.015em; line-height: 1.2; margin: 0 0 .9rem; }
+  .avatar {
+    width: 9rem; height: 9rem; border-radius: 50%;
+    background: var(--bg); border: 1px solid var(--line);
+    display: grid; place-items: center;
+    font-family: var(--head); font-weight: 700; font-size: 2.6rem; color: var(--accent);
+  }
+  .facts { list-style: none; padding: 0; margin: 1.25rem 0 0; font-family: var(--head); font-size: .98rem; display: grid; gap: .5rem; }
+  .facts li { display: grid; grid-template-columns: 7.5rem 1fr; gap: .75rem; }
+  .facts span:first-child { color: var(--muted); }
+  .profile h2 { margin-bottom: 1.1rem; }
+  .details { margin: 0; display: grid; grid-template-columns: 1fr; gap: 1rem 2.5rem; font-family: var(--head); }
+  @media (min-width: 40rem) { .details { grid-template-columns: repeat(3, auto); justify-content: start; } }
+  .details dt { font-size: .9rem; color: var(--muted); margin-bottom: .1rem; }
+  .details dd { margin: 0; font-size: 1.15rem; font-weight: 500; }
+
+  /* post */
+  .post { padding: 3.5rem 0 4rem; }
+  .post .wrap { max-width: 44rem; }
+  .meta { font-family: var(--head); font-size: .95rem; color: var(--muted); margin: 0 0 2rem; }
+  .post h2 { margin-top: 2.6rem; }
+  .post h3 { font-family: var(--head); font-size: 1.1rem; margin: 1.6rem 0 .4rem; }
+  .post p { margin: 0 0 1.15rem; }
+  .post ul { margin: 0 0 1.25rem; padding-left: 1.25rem; }
+  .post li { margin-bottom: .6rem; }
+  .post .quote {
+    border-left: 3px solid var(--mark);
+    padding: .1rem 0 .1rem 1.1rem;
+    margin: 1.5rem 0;
+    font-style: italic;
+  }
+  .refs { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--line); }
+  .refs p { padding-left: 2rem; text-indent: -2rem; font-size: 1rem; margin: 0 0 .9rem; line-height: 1.6; }
+
+  .flash { outline: 3px solid var(--mark); outline-offset: 6px; border-radius: 4px; }
+  .chat-fab {
+    position: fixed; left: 1.25rem; bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px)); z-index: 30;
+    display: flex; align-items: center; gap: .5rem;
+    font-family: var(--head); font-weight: 500; font-size: .95rem;
+    background: var(--ink); color: var(--bg);
+    border: 0; border-radius: 999px; padding: .65rem 1.1rem; cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,.25);
+  }
+  .chat-fab:hover { filter: brightness(1.15); }
+  .chat-fab { touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+  .chat-fab:active { cursor: grabbing; }
+  .chat-panel {
+    position: fixed; left: 1.25rem; bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px)); z-index: 30;
+    width: min(23rem, calc(100vw - 2.5rem)); height: min(30rem, calc(100vh - 8rem));
+    display: flex; flex-direction: column;
+    background: var(--surface); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    font-family: var(--head); font-size: .95rem; line-height: 1.45; overflow: hidden;
+  }
+  .chat-panel[hidden] { display: none; }
+  .chat-head { display: flex; justify-content: space-between; align-items: center; gap: .5rem; padding: .8rem 1rem; border-bottom: 1px solid var(--line); }
+  .chat-x { font: inherit; font-size: .9rem; color: var(--muted); background: transparent; border: 0; cursor: pointer; padding: .2rem .4rem; }
+  .chat-x:hover { color: var(--ink); }
+  .chat-log { flex: 1; overflow-y: auto; padding: .9rem 1rem; display: flex; flex-direction: column; gap: .6rem; }
+  .msg { max-width: 88%; padding: .55rem .8rem; border-radius: 10px; overflow-wrap: anywhere; }
+  .msg.bot { align-self: flex-start; background: var(--bg); border: 1px solid var(--line); }
+  .msg.me { align-self: flex-end; background: var(--accent); color: var(--accent-ink); }
+  .go-btn { display: block; width: fit-content; text-decoration: none; margin-top: .5rem; font: inherit; font-weight: 500; color: var(--accent-ink); background: var(--accent); border: 0; border-radius: 6px; padding: .35rem .7rem; cursor: pointer; }
+  .go-btn:hover { filter: brightness(1.08); }
+  .chat-chips { display: flex; flex-wrap: wrap; gap: .4rem; padding: 0 1rem .6rem; }
+  .chip { font: inherit; font-size: .85rem; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: .25rem .7rem; cursor: pointer; }
+  .chip:hover { background: var(--bg); }
+  .chat-input { display: flex; gap: .5rem; padding: .7rem 1rem; border-top: 1px solid var(--line); }
+  .chat-input input { flex: 1; min-width: 0; font: inherit; font-size: 1rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: .5rem .6rem; }
+  .chat-input input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .chat-input button { font: inherit; font-weight: 500; color: var(--accent-ink); background: var(--accent); border: 0; border-radius: 6px; padding: .5rem .9rem; cursor: pointer; }
+  .to-top {
+    position: fixed;
+    right: 1.25rem;
+    bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+    font-family: var(--head);
+    font-weight: 500;
+    font-size: .95rem;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: 0;
+    border-radius: 999px;
+    padding: .65rem 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,.25);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .2s;
+  }
+  .to-top.show { opacity: 1; visibility: visible; }
+  .to-top:hover { filter: brightness(1.08); }
+  footer { border-top: 1px solid var(--line); padding: 1.5rem 0; font-family: var(--head); font-size: .9rem; color: var(--muted); }
+
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap">
+    <div class="account">
+      <button type="button" class="acct-btn" id="acctBtn" aria-expanded="false" aria-controls="acctMenu" aria-haspopup="true">
+        <span class="avatar-sm" aria-hidden="true">CM</span>
+        <span class="brand">Cyle Marquiso</span>
+        <svg class="chev" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="acct-menu" id="acctMenu" role="region" aria-label="Student details" hidden>
+        <p class="acct-title">Student details</p>
+        <dl>
+          <div><dt>Name</dt><dd>Cyle Marquiso</dd></div>
+          <div><dt>Section</dt><dd>IT33</dd></div>
+          <div><dt>Subject</dt><dd>IT 372</dd></div>
+          <div><dt>School email</dt><dd><a href="mailto:cyle.marquiso@urio.edu.ph">cyle.marquiso@urio.edu.ph</a></dd></div>
+        </dl>
+        <div class="mail-form">
+          <p class="mf-title">Send me an email</p>
+          <label>Your name
+            <input type="text" id="mfName" autocomplete="name">
+          </label>
+          <label>Subject
+            <input type="text" id="mfSubject">
+          </label>
+          <label>Message
+            <textarea id="mfMessage"></textarea>
+          </label>
+          <div class="mf-actions">
+            <a class="send-btn" id="mfSend" href="mailto:cyle.marquiso@urio.edu.ph">Send email</a>
+            <button type="button" class="copy-btn" id="mfCopy">Copy address</button>
+          </div>
+          <p class="mf-note" id="mfNote" role="status">Opens your email app with this message ready to send.</p>
+        </div>
+      </div>
+    </div>
+    <nav aria-label="Main">
+      <a href="#post">Blog post</a>
+      <a href="#references">References</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <article class="post" id="post">
+    <div class="wrap">
+      <h2 id="intro" style="margin-top:0">Seeing Our Risk Assessment Through an Auditor's Eyes</h2>
+      <p>When my group completed our Risk Assessment Form, we were proud of it. We identified threats, rated likelihood and impact, and recommended treatments that made sense. But once I put on an auditor's hat, the question changed. An assessor doesn't ask, "Did you think about risk?" An auditor asks, "Can you prove it?" That shift exposed gaps in our work and in the organization we assessed, and it changed how I think about security documentation.</p>
+
+      <h2 id="s-own">Starting with the question auditors always ask first</h2>
+      <p>Nearly every audit framework begins with some version of the same question: what do you own? Risk can't be assessed for assets nobody has identified. NIST's guidance on risk assessment treats the identification of assets and their value to the mission as a foundation for everything that follows, because threat, vulnerability, and impact judgments only mean something relative to what is being protected (Joint Task Force Transformation Initiative, 2012). ISO/IEC 27001:2022 makes the same point as a requirement, expecting an inventory of information and other associated assets with assigned owners (International Organization for Standardization [ISO], 2022).</p>
+      <p>Looking back at our form, the organization had a reasonable informal sense of what mattered. Staff could tell us which systems were critical, where sensitive records lived, and which services the business couldn't operate without. But "people know" is not an inventory. An auditor can't test someone's memory. They need a record that exists independently of any one person, is kept current, and can be compared against reality.</p>
+
+      <h2 id="s-assets">Which assets mattered most</h2>
+      <p>Three categories of assets carried most of the risk in our assessment.</p>
+      <p><strong>Information assets</strong> came first: records about the organization's clients and operations, plus the credentials and configuration data that guard access to everything else. Information is usually the real target, and it often sits scattered across systems, shared drives, and personal devices, which makes it the hardest asset to inventory.</p>
+      <p><strong>Core systems and infrastructure</strong> came second: the servers, applications, network components, and cloud services that store, process, and move that information. Their importance comes from dependency. When one fails, many business functions go with it.</p>
+      <p><strong>Supporting assets</strong>, including the people with privileged access, key third-party providers, and the physical spaces housing equipment, came third. These are the easiest to overlook, and an auditor will rarely let them slide. Over-reliance on a single administrator or a single vendor is a risk in its own right, even if it never appears on a hardware list.</p>
+
+      <h2 id="s-class">Classification and ownership</h2>
+      <p>Identifying assets is only the first step. Each one needs a classification and an owner, and these two ideas work together.</p>
+      <p>Classification tells the organization how much protection an asset deserves. A simple scheme works well: public, internal, confidential, and restricted, each tied to handling rules for storage, sharing, retention, and disposal. ISO/IEC 27001 expects information to be classified according to its legal requirements, value, criticality, and sensitivity (ISO, 2022). Classification also drives prioritization. A "restricted" asset with a weak control should jump the queue ahead of a "public" asset with the same weakness.</p>
+      <p>Ownership answers the accountability question. An asset owner is the person, ideally a role rather than a named individual, who decides how the asset is classified, who may access it, and whether its controls are adequate. This is different from a custodian, such as IT staff who run the system day to day. Many organizations blur the two, so the technical team ends up making business decisions about data it doesn't actually own. An auditor looking at ownership will ask whether each critical asset has a named accountable role, whether that role knows it holds the responsibility, and whether it has ever actually exercised it, for example by reviewing access or approving a change.</p>
+      <p>In our assessment, responsibility was understood in practice but rarely written down. Ownership lived in habit rather than in documentation. That works until someone leaves, a project changes hands, or an incident forces the question of who had the authority to decide.</p>
+
+      <h2 id="s-evidence">What evidence an audit would require</h2>
+      <p>This is where an auditor's view differs most from a risk assessor's. A risk assessment says a control should exist. An audit asks for evidence that it exists and works. NIST's assessment guidance describes three basic methods: examining documentation and records, interviewing personnel, and testing the mechanisms themselves (Joint Task Force, 2022). A strong audit uses all three, because a policy on paper, a confident answer in an interview, and a working technical control are different forms of proof.</p>
+      <p>For the controls our group recommended, an auditor would reasonably expect:</p>
+      <ul>
+        <li><strong>A current asset inventory</strong> with classification, owner, location, and lifecycle status, plus evidence that it is reviewed on a schedule.</li>
+        <li><strong>Approved policies and procedures</strong> that match what staff actually do, with version history and approval records.</li>
+        <li><strong>Access control records</strong>, including how access is granted, reviewed, and removed, and logs showing the process was followed for real people on real dates.</li>
+        <li><strong>Change and patch records</strong> showing that updates are tested, approved, and applied within a defined timeframe.</li>
+        <li><strong>Backup and recovery proof</strong>, meaning not just that backups run but that a restoration was tested and the results recorded.</li>
+        <li><strong>Monitoring and incident records</strong> demonstrating that alerts are reviewed and that incidents, including near misses, are logged and followed up.</li>
+        <li><strong>Training and awareness records</strong> showing who was trained, when, and on what.</li>
+        <li><strong>Third-party assurance</strong>, such as contracts, security requirements, and reviews of critical providers.</li>
+      </ul>
+      <p>The key phrase is "evidence of operation over time." A control that was configured once and never checked is a claim, not an assurance.</p>
+
+      <h2 id="s-gaps">The gaps an auditor would likely find</h2>
+      <p>Reflecting honestly, I think an auditor would find a familiar pattern, one that shows up in many organizations that are otherwise doing reasonable work.</p>
+      <p>First, <strong>the inventory would be incomplete or informal</strong>. Core systems would likely be accounted for, but data stores, cloud services adopted without formal review, and personal or temporary devices would not. An auditor reconciling the list against what is actually on the network typically finds assets nobody listed.</p>
+      <p>Second, <strong>ownership would be implied rather than assigned</strong>. Responsibility would be understood in conversation but not recorded, which makes it impossible to prove who was accountable for a decision.</p>
+      <p>Third, <strong>classification would be inconsistent or absent</strong>, meaning protection levels would be applied by instinct rather than by rule.</p>
+      <p>Fourth, <strong>controls would exist without a trail</strong>. Many protections would probably be working, but the logs, review sign-offs, and test results that prove it would be scattered, undated, or never produced. In audit terms, a control without evidence is treated as not operating.</p>
+      <p>Fifth, <strong>reviews would be reactive</strong>. Access rights, policies, and risk ratings tend to get revisited after a problem rather than on a planned cycle.</p>
+      <p>None of these gaps means the organization was careless. They reflect the normal distance between doing security work and demonstrating it. But that distance is exactly what an audit measures.</p>
+
+      <h2 id="s-inventory">How an inventory and checklist strengthen our treatments</h2>
+      <p>Our group's recommended treatments were sensible: tighter access controls, improved backup practices, better monitoring, and clearer procedures. The auditor's lens showed me that each of them depends on two supporting tools.</p>
+      <p>An <strong>asset inventory</strong> makes treatments targetable. We can't apply stronger access controls to a system we haven't listed, or verify backups for data we haven't classified. NIST's control catalog treats inventory as a foundational control family for this reason, since many other controls rely on knowing which components exist and who is responsible for them (Joint Task Force, 2020). The inventory also turns risk ratings into something stable. Instead of rating risk in the abstract each time, we can tie each risk to a specific asset, owner, and classification, which makes priorities easier to defend.</p>
+      <p>An <strong>audit checklist</strong> makes treatments verifiable. For each recommended control, the checklist would state the control objective, the evidence required, where that evidence lives, who provides it, and how often it is reviewed. That turns "we recommend better monitoring" into "monitoring alerts are reviewed weekly, and the review log is retained for twelve months." The first is an intention; the second can be tested. A checklist also creates a natural improvement loop. Each audit cycle shows which controls produced clean evidence and which didn't, and those results feed back into the next risk assessment.</p>
+      <p>Together, the two tools close the loop that a risk assessment alone leaves open: identify, assign, protect, verify, and review.</p>
+
+      <h2 id="s-final">Final reflection</h2>
+      <p>Revisiting our form as an auditor made me value documentation differently. I used to think of records as paperwork that follows the real security work. Now I see them as part of the control itself, because an organization that can't demonstrate its protections can't reliably maintain them, defend them to a regulator, or learn from their failures. If I could revise our assessment, I would add an inventory reference, an owner, and an evidence requirement to every recommended treatment. The risk would be no smaller, but the organization would finally be able to show that it is managing it.</p>
+
+      <section class="refs" id="references" aria-labelledby="refs-title">
+        <h2 id="refs-title" style="margin-top:0">References</h2>
+        <p>International Organization for Standardization. (2022). <em>Information security, cybersecurity and privacy protection — Information security management systems — Requirements</em> (ISO/IEC Standard No. 27001:2022).</p>
+        <p>Joint Task Force. (2020). <em>Security and privacy controls for information systems and organizations</em> (NIST Special Publication 800-53, Rev. 5). National Institute of Standards and Technology. <a href="https://doi.org/10.6028/NIST.SP.800-53r5">https://doi.org/10.6028/NIST.SP.800-53r5</a></p>
+        <p>Joint Task Force. (2022). <em>Assessing security and privacy controls in information systems and organizations</em> (NIST Special Publication 800-53A, Rev. 5). National Institute of Standards and Technology. <a href="https://doi.org/10.6028/NIST.SP.800-53Ar5">https://doi.org/10.6028/NIST.SP.800-53Ar5</a></p>
+        <p>Joint Task Force Transformation Initiative. (2012). <em>Guide for conducting risk assessments</em> (NIST Special Publication 800-30, Rev. 1). National Institute of Standards and Technology. <a href="https://doi.org/10.6028/NIST.SP.800-30r1">https://doi.org/10.6028/NIST.SP.800-30r1</a></p>
+      </section>
+    </div>
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">© 2026 Cyle Marquiso. Coursework blog.</div>
+</footer>
+
+<button type="button" class="chat-fab" id="chatFab" title="Drag to move" aria-expanded="false" aria-controls="chatPanel">
+  <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3h12v8H7l-3 3v-3H2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+  <span>Ask</span>
+</button>
+<section class="chat-panel" id="chatPanel" aria-label="Find something in this post" hidden>
+  <div class="chat-head"><strong>Find something in this post</strong><button type="button" class="chat-x" id="chatClose">Close</button></div>
+  <div class="chat-log" id="chatLog" role="log" aria-live="polite"></div>
+  <div class="chat-chips" id="chatChips"></div>
+  <div class="chat-input">
+    <input type="text" id="chatInput" placeholder="Where is...?" aria-label="Ask where something is" autocomplete="off">
+    <button type="button" id="chatSend">Send</button>
+  </div>
+</section>
+<button type="button" class="to-top" id="toTop" aria-label="Back to top">Back to top</button>
+<script>
+  (function () {
+    var btn = document.getElementById('toTop');
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function toggle() { btn.classList.toggle('show', window.scrollY > 600); }
+    window.addEventListener('scroll', toggle, { passive: true });
+    toggle();
+    btn.addEventListener('click', function () {
+      window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+    });
+  })();
+</script>
+<script>
+  (function () {
+    var btn = document.getElementById('acctBtn');
+    var menu = document.getElementById('acctMenu');
+    var acct = btn.parentNode;
+    var pinned = false, hovering = false, timer;
+    function setOpen(open) {
+      menu.hidden = !open;
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (!open) pinned = false;
+    }
+    acct.addEventListener('pointerenter', function (e) {
+      if (e.pointerType !== 'mouse') return;
+      hovering = true;
+      clearTimeout(timer);
+      setOpen(true);
+    });
+    acct.addEventListener('pointerleave', function (e) {
+      if (e.pointerType !== 'mouse') return;
+      hovering = false;
+      if (pinned) return;
+      timer = setTimeout(function () { setOpen(false); }, 150);
+    });
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (menu.hidden) { setOpen(true); pinned = true; }
+      else if (!pinned && hovering) { pinned = true; }
+      else { setOpen(false); }
+    });
+    document.addEventListener('click', function (e) {
+      if (!menu.hidden && !menu.contains(e.target)) setOpen(false);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !menu.hidden) { setOpen(false); btn.focus(); }
+    });
+
+    // Email composer: builds a mailto link from the fields
+    var MAIL = 'cyle.marquiso@urio.edu.ph';
+    var fName = document.getElementById('mfName');
+    var fSubj = document.getElementById('mfSubject');
+    var fMsg = document.getElementById('mfMessage');
+    var send = document.getElementById('mfSend');
+    var copy = document.getElementById('mfCopy');
+    var note = document.getElementById('mfNote');
+    var defaultNote = note.textContent;
+    function build() {
+      var n = fName.value.trim();
+      var s = fSubj.value.trim() || 'Message from your coursework blog';
+      var body = fMsg.value.trim() + (n ? '\n\nFrom: ' + n : '');
+      send.href = 'mailto:' + MAIL + '?subject=' + encodeURIComponent(s) + '&body=' + encodeURIComponent(body);
+    }
+    [fName, fSubj, fMsg].forEach(function (el) { el.addEventListener('input', build); });
+    build();
+    menu.addEventListener('focusin', function () { pinned = true; });
+    send.addEventListener('click', function (e) {
+      if (!fMsg.value.trim()) {
+        e.preventDefault();
+        note.textContent = 'Write a message first.';
+        fMsg.focus();
+      } else {
+        note.textContent = defaultNote;
+      }
+    });
+    copy.addEventListener('click', function () {
+      function done(ok) { note.textContent = ok ? 'Address copied: ' + MAIL : 'Could not copy. Address: ' + MAIL; }
+      try {
+        navigator.clipboard.writeText(MAIL).then(function () { done(true); }, function () { done(false); });
+      } catch (err) { done(false); }
+    });
+  })();
+</script>
+<script>
+  (function () {
+    var fab = document.getElementById('chatFab');
+    var panel = document.getElementById('chatPanel');
+    var closeBtn = document.getElementById('chatClose');
+    var log = document.getElementById('chatLog');
+    var chips = document.getElementById('chatChips');
+    var input = document.getElementById('chatInput');
+    var sendBtn = document.getElementById('chatSend');
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function isSmall() { return window.innerWidth < 640; }
+
+    var SECTIONS = [
+      { id: 'intro', title: 'Introduction', text: 'The post starts here, with why an auditor asks "can you prove it?" instead of "did you think about risk?"', keys: ['introduction', 'intro', 'overview', 'beginning', 'top of the post', 'what is this post about', 'summary'] },
+      { id: 's-own', title: 'The question auditors ask first', text: 'This part covers the first audit question, what do you own, and what NIST and ISO expect.', keys: ['what do you own', 'first question', 'framework', 'frameworks', 'audit question', 'inventory requirement'] },
+      { id: 's-assets', title: 'Which assets mattered most', text: 'The three asset groups that carried the most risk are in this section.', keys: ['asset', 'assets', 'information assets', 'core systems', 'infrastructure', 'supporting assets', 'vendor', 'vendors', 'third party', 'third-party', 'privileged', 'mattered', 'important'] },
+      { id: 's-class', title: 'Classification and ownership', text: 'This section explains how assets should be classified and who should own them.', keys: ['classification', 'classify', 'classified', 'owner', 'owners', 'ownership', 'custodian', 'accountable', 'accountability', 'responsible', 'responsibility', 'restricted', 'confidential', 'public', 'internal'] },
+      { id: 's-evidence', title: 'What evidence an audit would require', text: 'The evidence an auditor would ask for is listed in this section.', keys: ['evidence', 'proof', 'prove', 'records', 'logs', 'backup', 'backups', 'patch', 'training', 'policy', 'policies', 'access control', 'interview', 'testing', 'audit requirements'] },
+      { id: 's-gaps', title: 'Gaps an auditor would likely find', text: 'The likely audit gaps are described in this section.', keys: ['gap', 'gaps', 'findings', 'weakness', 'weaknesses', 'problems', 'missing', 'incomplete', 'reactive', 'issues', 'what would an auditor find'] },
+      { id: 's-inventory', title: 'How an inventory and checklist strengthen our treatments', text: 'This section covers the asset inventory, the audit checklist, and the recommended treatments.', keys: ['checklist', 'treatment', 'treatments', 'recommendation', 'recommendations', 'recommended', 'inventory', 'improve', 'strengthen', 'control objective'] },
+      { id: 's-final', title: 'Final reflection', text: 'The closing reflection is here.', keys: ['conclusion', 'final', 'reflection', 'closing', 'reflect', 'lesson', 'lessons', 'takeaway'] },
+      { id: 'references', title: 'References', text: 'The APA references are at the bottom of the page.', keys: ['reference', 'references', 'source', 'sources', 'citation', 'citations', 'cite', 'apa', 'bibliography', 'nist', 'iso', 'where did you get'] },
+      { contact: true, title: 'Contact', text: 'You can email Cyle from the profile menu at the top of the page. I will open it for you.', keys: ['email', 'e-mail', 'contact', 'reach you', 'message you', 'send a message', 'student', 'author', 'who wrote', 'who are you', 'profile', 'section number', 'subject code'] }
+    ];
+    var STOP = { where: 1, what: 1, which: 1, this: 1, that: 1, with: 1, have: 1, from: 1, about: 1, find: 1, show: 1, tell: 1, does: 1, post: 1, page: 1, mention: 1, paragraph: 1, there: 1, talk: 1, take: 1, please: 1, could: 1, would: 1, want: 1, look: 1, looking: 1, section: 1 };
+    var index = null;
+
+    function norm(t) { return ' ' + t.toLowerCase().replace(/[^a-z0-9-]+/g, ' ') + ' '; }
+    function hasKey(padded, k) {
+      return padded.indexOf(' ' + k + ' ') !== -1 || (k.length > 4 && padded.indexOf(k) !== -1);
+    }
+    function addMsg(text, who, target, label) {
+      var d = document.createElement('div');
+      d.className = 'msg ' + who;
+      d.textContent = text;
+      if (target) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'go-btn';
+        b.textContent = label || 'Take me there';
+        b.addEventListener('click', function () { go(target, true); });
+        d.appendChild(b);
+      }
+      log.appendChild(d);
+      log.scrollTop = log.scrollHeight;
+    }
+    function flash(el) {
+      el.classList.add('flash');
+      setTimeout(function () { el.classList.remove('flash'); }, 2500);
+    }
+    function go(el, closeOnSmall) {
+      if (closeOnSmall && isSmall()) setPanel(false);
+      el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+      flash(el);
+    }
+    var MAILTO = 'mailto:cyle.marquiso@urio.edu.ph?subject=' + encodeURIComponent('Message from your coursework blog');
+    function addMailMsg(text) {
+      var d = document.createElement('div');
+      d.className = 'msg bot';
+      d.textContent = text;
+      var a = document.createElement('a');
+      a.className = 'go-btn';
+      a.href = MAILTO;
+      a.textContent = 'Email Cyle';
+      d.appendChild(a);
+      log.appendChild(d);
+      log.scrollTop = log.scrollHeight;
+    }
+    function openMail() {
+      var a = document.createElement('a');
+      a.href = MAILTO;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+    function openContact() {
+      if (isSmall()) setPanel(false);
+      window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+      var m = document.getElementById('acctMenu');
+      if (m && m.hidden) document.getElementById('acctBtn').click();
+      var link = m && m.querySelector('a[href^="mailto"]');
+      if (link) flash(link.parentNode);
+    }
+    function buildIndex() {
+      index = [];
+      document.querySelectorAll('#post p, #post li').forEach(function (el) {
+        index.push({ el: el, text: ' ' + el.textContent.toLowerCase() });
+      });
+    }
+    function qwords(t) {
+      return t.toLowerCase().split(/[^a-z0-9]+/).map(function (w) { return w.replace(/s$/, ''); }).filter(function (w) { return w.length >= 4 && !STOP[w] && !STOP[w + 's']; });
+    }
+    function answer(q) {
+      var raw = q.trim();
+      if (!raw) return;
+      addMsg(raw, 'me');
+      var padded = norm(raw);
+      if (/^(hi|hello|hey|good morning|good afternoon|good evening)( |$)/.test(raw.toLowerCase())) {
+        addMsg('Hi! Tell me what you are looking for, for example "Where are the references?", and I will take you there.', 'bot');
+        return;
+      }
+      var best = null, bestScore = 0;
+      SECTIONS.forEach(function (s) {
+        var sc = 0;
+        s.keys.forEach(function (k) { if (hasKey(padded, k)) sc += k.length; });
+        if (sc > bestScore) { bestScore = sc; best = s; }
+      });
+      if (best) {
+        if (best.contact) {
+          addMsg('The profile menu is at the top of the page. It has the school email and a short email form, so I am opening it now.', 'bot');
+          openContact();
+          return;
+        }
+        var el = document.getElementById(best.id);
+        addMsg('Found it: ' + best.title + '. ' + best.text, 'bot', el, 'Take me there again');
+        if (!isSmall()) go(el, false);
+        else addMsg('Tap the button above to jump there.', 'bot');
+        return;
+      }
+      if (!index) buildIndex();
+      var qw = qwords(raw), bestEl = null, bs = 0;
+      if (qw.length) {
+        index.forEach(function (item) {
+          var sc = 0;
+          qw.forEach(function (w) { if (item.text.indexOf(w) !== -1) sc++; });
+          if (sc > bs) { bs = sc; bestEl = item.el; }
+        });
+      }
+      if (bestEl && (bs >= 2 || (qw.length <= 2 && bs >= 1))) {
+        addMsg('The closest match is this passage.', 'bot', bestEl, 'Take me there');
+        if (!isSmall()) go(bestEl, false);
+        return;
+      }
+      addMsg('I could not find that in this post. Try asking about assets, classification and ownership, audit evidence, gaps, the checklist, the references, or how to email Cyle.', 'bot');
+    }
+    var moved = false, tracking = false, dragging = false, suppressClick = false, sx = 0, sy = 0, ox = 0, oy = 0;
+    function clampFab() {
+      var r = fab.getBoundingClientRect();
+      var x = Math.min(Math.max(8, r.left), window.innerWidth - r.width - 8);
+      var y = Math.min(Math.max(8, r.top), window.innerHeight - r.height - 8);
+      fab.style.left = x + 'px';
+      fab.style.top = y + 'px';
+    }
+    function positionPanel() {
+      if (!moved) { panel.style.left = ''; panel.style.top = ''; panel.style.bottom = ''; return; }
+      var fr = fab.getBoundingClientRect();
+      var pr = panel.getBoundingClientRect();
+      var left = Math.min(Math.max(8, fr.left), window.innerWidth - pr.width - 8);
+      var top = fr.top - pr.height - 10;
+      if (top < 8) top = Math.min(fr.bottom + 10, window.innerHeight - pr.height - 8);
+      panel.style.left = left + 'px';
+      panel.style.top = Math.max(8, top) + 'px';
+      panel.style.bottom = 'auto';
+    }
+    function setPanel(open) {
+      panel.hidden = !open;
+      fab.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (open) { positionPanel(); input.focus(); }
+    }
+    fab.addEventListener('pointerdown', function (e) {
+      if (e.button !== undefined && e.button !== 0) return;
+      var r = fab.getBoundingClientRect();
+      sx = e.clientX; sy = e.clientY; ox = r.left; oy = r.top;
+      tracking = true; dragging = false;
+      try { fab.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+    fab.addEventListener('pointermove', function (e) {
+      if (!tracking) return;
+      var dx = e.clientX - sx, dy = e.clientY - sy;
+      if (!dragging && Math.abs(dx) + Math.abs(dy) < 6) return;
+      dragging = true; moved = true;
+      fab.style.bottom = 'auto';
+      fab.style.left = (ox + dx) + 'px';
+      fab.style.top = (oy + dy) + 'px';
+      clampFab();
+      if (!panel.hidden) positionPanel();
+    });
+    function endDrag(e, wasCancel) {
+      tracking = false;
+      if (dragging && !wasCancel) {
+        suppressClick = true;
+        setTimeout(function () { suppressClick = false; }, 0);
+      }
+      dragging = false;
+      try { fab.releasePointerCapture(e.pointerId); } catch (err) {}
+    }
+    fab.addEventListener('pointerup', function (e) { endDrag(e, false); });
+    fab.addEventListener('pointercancel', function (e) { endDrag(e, true); });
+    fab.addEventListener('keydown', function (e) {
+      var d = { ArrowLeft: [-20, 0], ArrowRight: [20, 0], ArrowUp: [0, -20], ArrowDown: [0, 20] }[e.key];
+      if (!d) return;
+      e.preventDefault();
+      var r = fab.getBoundingClientRect();
+      moved = true;
+      fab.style.bottom = 'auto';
+      fab.style.left = (r.left + d[0]) + 'px';
+      fab.style.top = (r.top + d[1]) + 'px';
+      clampFab();
+      if (!panel.hidden) positionPanel();
+    });
+    window.addEventListener('resize', function () {
+      if (moved) { clampFab(); if (!panel.hidden) positionPanel(); }
+    });
+    fab.addEventListener('click', function () { if (suppressClick) return; setPanel(panel.hidden); });
+    closeBtn.addEventListener('click', function () { setPanel(false); fab.focus(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !panel.hidden) { setPanel(false); fab.focus(); }
+    });
+    function submit() { var v = input.value; input.value = ''; answer(v); }
+    sendBtn.addEventListener('click', submit);
+    input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
+
+    ['Where are the references?', 'Where is the evidence section?', 'What gaps would an auditor find?', 'How can I email you?'].forEach(function (t) {
+      var c = document.createElement('button');
+      c.type = 'button';
+      c.className = 'chip';
+      c.textContent = t;
+      c.addEventListener('click', function () { answer(t); });
+      chips.appendChild(c);
+    });
+    addMsg('Hi! I can help you find things in this post. Ask me where something is, like "Where are the references?", and I will take you there.', 'bot');
+  })();
+</script>
+</body>
+</html>
